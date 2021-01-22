@@ -547,7 +547,7 @@ function renderMesh(w, ctx, tri, res) {
     let rowsperworker = 15
     for (let y = 0; y < res; y++) {
         if (y % rowsperworker == 0) {
-            workers.push(new Worker('./3d.js'));
+            workers.push(new Worker('./worker.js'));
             workers[workers.length - 1].addEventListener('error', console.error);
             workers[workers.length - 1].addEventListener('message', e => {
                 done++
@@ -563,20 +563,6 @@ setInterval(() => {
     rotation[1] += Math.PI / 4
 }, 4000)
 
-//INSTRUCTIONS FOR DEPLOYMENT
-/*
-heroku login
-git init
-heroku git:remote -a nicks-dev-website
-git add .
-git commit -m "a commit"
-git push heroku main
-
-_ _ _ _ _ _ _ _ _ _ _ _
-R a s p b e r r y p i 4
-
-
-
-
-*/
+// _ _ _ _ _ _ _ _ _ _ _ _ _
+// N i c k g i t h u b 1 2 3 
 
