@@ -501,7 +501,6 @@ rubiks.algorithm('U')
 
 
 //RENDERING
-var triangles = rubiks.render(), resolution = 60
 {
     function rotationMatrix(y, p, r) {
         let c = Math.cos, s = Math.sin
@@ -522,46 +521,52 @@ var triangles = rubiks.render(), resolution = 60
         return this.map((e, i) => e + B[i])
     }
 }
-var rotation = [0, 0, 0]
-function renderMesh(w, ctx, tri, res) {
+//1 worker: 5000ms
+//2 worker: 2800ms
+//3 worker: 2200ms
+//4 worker: 2000ms <=
+//5 worker: 2100ms
+//6 worker: 2300ms
+var rotation = [0, 0, 0], workers = Array(10)
+var done, img
+var triangles = rubiks.render(), resolution = 60, timeElapsed = 0
+
+function initWorkers(ctx, res) {
+    for (let y = 0; y < workers.length; y++) {
+        workers[y] = new Worker('./worker.js');
+        workers[y].addEventListener('error', console.error);
+        workers[y].addEventListener('message', e => {
+            done++
+            for (let x in e.data.img) img[e.data.i * res * 4 + Number(x)] = e.data.img[Number(x)]
+            if (done == workers.length) {
+                let imgdata = new ImageData(img, res, res)
+                ctx.putImageData(imgdata, 0, 0)
+                console.log(`${Date.now() - timeElapsed}ms elapsed`)
+            }
+        })
+    }
+}
+function renderMesh(tri, res) {
+    timeElapsed = Date.now()
     for (let t of tri) {
         t.rotated = [t[0], t[1], t[2]]
         let rot = rotationMatrix(...rotation), offset = t[4]
         t.rotated = t.rotated.map(p => p.rotate(rot))
         t.rotated = t.rotated.map(p => p.add(offset))
     }
-    let workers = []
-    let done = 0, img = new Uint8ClampedArray(res * res * 4)
-    function drawImage() {
-        let imgdata = new ImageData(img, res, res)
-        ctx.putImageData(imgdata, 0, 0)
-        console.log(Date.now() - d)
-    }
-    let d = Date.now()
-    //1 worker: 5000ms
-    //2 worker: 2800ms
-    //3 worker: 2200ms
-    //4 worker: 2000ms <=
-    //5 worker: 2100ms
-    //6 worker: 2300ms
-    let rowsperworker = 15
-    for (let y = 0; y < res; y++) {
-        if (y % rowsperworker == 0) {
-            workers.push(new Worker('./worker.js'));
-            workers[workers.length - 1].addEventListener('error', console.error);
-            workers[workers.length - 1].addEventListener('message', e => {
-                done++
-                for (let x in e.data.img) img[e.data.i * res * 4 + Number(x)] = e.data.img[Number(x)]
-                if (done == res / rowsperworker) drawImage()
-            })
-            workers[workers.length - 1].postMessage({ y, tri, res, fov: 1, rowsperworker })
-        }
+    done = 0
+    img = new Uint8ClampedArray(res * res * 4)
+    for (let y = 0; y < workers.length; y++) {
+        workers[y].postMessage({ y: y * res / workers.length, tri, res, fov: 1, rowsperworker: res / workers.length })
     }
 }
+initWorkers(context, resolution)
 setInterval(() => {
-    renderMesh(canvas.clientWidth, context, triangles, resolution)
-    rotation[1] += Math.PI / 4
-}, 4000)
+    rotation[1] += Math.PI / 8
+    renderMesh(triangles, resolution)
+}, 3000)
+renderMesh(triangles, resolution)
+
 
 // _ _ _ _ _ _ _ _ _ _ _ _ _
 // N i c k g i t h u b 1 2 3 
