@@ -49,11 +49,12 @@ p {
 }
 ul{
     background-color: var(--alt-backg-col);
-    padding-top: 20px;
+    padding-top: 10px;
     padding-bottom: 20px;
     padding-left: 50px;
     padding-right: 20px;   
     list-style-type: none;
+    margin-top: 0;
     /* max-width: auto; */
     /* width: max-content; */
 }
@@ -66,7 +67,7 @@ li {
     background-color: var(--fill-col);
     display: inline-block;
 }
-a:link, a:visited {
+.project:link, .project:visited {
     color: inherit;
     padding: calc(0.5*(20px - 0.5em)) 10px;
 	margin: calc(0.5*(20px - 0.5em)) 0;
@@ -74,7 +75,7 @@ a:link, a:visited {
     text-decoration: none;
     display: inline-block;
 }
-a:hover, a:active {
+.project:hover, .project:active {
   background-color: var(--fill-col);
 }
 
@@ -95,6 +96,17 @@ canvas {
 	height: calc(100% - 20px)
 }
 
+#main-project {
+    display: block;
+    background-image: url("https://nichowas.github.io/NickDevSite/logo.png");
+    background-size: 30px;
+    width: 30px;
+    height: 30px;
 
+    margin: 10px;
+    margin-bottom: 0;
+    margin-left: 50px;
+    border: solid #000 2px;
+}
 
 
